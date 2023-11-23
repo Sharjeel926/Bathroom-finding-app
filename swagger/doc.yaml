@@ -1,0 +1,443 @@
+
+openapi: 3.0.0
+info:
+  title: "Bathroom Finding App API Documentation"
+  version: "1.0.0"
+  description: "Documentation for the bathroom finding app API"
+
+paths:
+  /api/auth/signup:
+    post:
+      summary: "User Registration"
+      description: "Register a new user with a phone number."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phoneNumber:
+                  type: string
+                  description: "The phone number of the user."
+      responses:
+        "200":
+          description: "Otp is sending to your phone number."
+        "400":
+          description: "User already registered or missing parameters."
+        "500":
+          description: "Server Error."
+
+  /api/auth/verifyUser:
+    post:
+      summary: "Verify User"
+      description: "Verify a user using the provided OTP."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                otp:
+                  type: string
+                  description: "The OTP sent to the user's phone number."
+                phoneNumber:
+                  type: string
+                  description: "The phone number of the user."
+      responses:
+        "200":
+          description: "Verification successful."
+        "400":
+          description: "Failed to verify or invalid OTP."
+        "401":
+          description: "User not registered."
+        "500":
+          description: "Server Error."
+
+  /api/auth/signIn:
+    post:
+      summary: "User Sign In"
+      description: "Sign in a user using phone number."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phoneNumber:
+                  type: string
+                  description: "The phone number of the user."
+      responses:
+        "200":
+          description: "Otp is sending to your phone number."
+        "404":
+          description: "User not found."
+        "500":
+          description: "Server Error."
+
+  /api/auth/verifySignIn:
+    post:
+      summary: "Verify Sign In"
+      description: "Verify sign-in using the provided OTP and generate a JWT token."
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                otp:
+                  type: string
+                  description: "The OTP sent to the user's phone number."
+                phoneNumber:
+                  type: string
+                  description: "The phone number of the user."
+      responses:
+        "200":
+          description: "OTP verified successfully. JWT token generated."
+        "401":
+          description: "Invalid OTP or user not registered."
+        "500":
+          description: "Internal server error."
+
+  /api/auth/addProfile:
+    post:
+      summary: "Add Profile"
+      description: "Add or update user profile information."
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  description: "The ID of the user."
+                fullName:
+                  type: string
+                  description: "The full name of the user."
+                DateOfBirth:
+                  type: string
+                  description: "The date of birth of the user."
+                Gender:
+                  type: string
+                  description: "The gender of the user (male/female/unisex)."
+                email:
+                  type: string
+                  description: "The email address of the user."
+                image:
+                  type: string
+                  format: binary
+                  description: "The profile picture of the user."
+      responses:
+        "200":
+          description: "Data updated successfully."
+        "400":
+          description: "Invalid data provided."
+        "401":
+          description: "User not verified. Verify the user before adding or updating the profile."
+        "404":
+          description: "User not found."
+        "500":
+          description: "Internal server error."
+
+  /api/nearByLoo:
+    post:
+      summary: "Nearby Bathrooms"
+      description: "Get a list of nearby bathrooms based on location and gender."
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                longitude:
+                  type: number
+                  description: "The longitude of the user's location."
+                latitude:
+                  type: number
+                  description: "The latitude of the user's location."
+                gender:
+                  type: string
+                  description: "The gender preference for nearby bathrooms."
+      responses:
+        "200":
+          description: "List of nearby bathrooms."
+        "400":
+          description: "Missing parameters."
+        "500":
+          description: "Internal server error."
+
+  /api/findExact:
+    post:
+      summary: "Find Exact Bathroom"
+      description: "Find bathrooms based on the provided partial or full bathroom name."
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                looName:
+                  type: string
+                  description: "The partial or full name of the bathroom."
+      responses:
+        "200":
+          description: "List of bathrooms matching the provided name."
+        "400":
+          description: "Missing parameters."
+        "401":
+          description: "Data not retrieved successfully."
+        "500":
+          description: "Internal server error."
+
+  /api/writeReviews:
+    post:
+      summary: "Write Reviews"
+      description: "Write and submit reviews for a specific bathroom."
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  description: "The ID of the user providing the review."
+                bathId:
+                  type: string
+                  description: "The ID of the bathroom for which the review is submitted."
+                cleanlinessRating:
+                  type: number
+                  description: "Cleanliness rating (1 to 5)."
+                qualityRating:
+                  type: number
+                  description: "Quality rating (1 to 5)."
+                overallExperienceRating:
+                  type: number
+                  description: "Overall experience rating (1 to 5)."
+                overallExperienceText:
+                  type: string
+                  description: "Text review describing the overall experience."
+      responses:
+        "201":
+          description: "Reviews are successfully added."
+        "400":
+          description: "Missing parameters."
+        "404":
+          description: "User or bath not found."
+        "500":
+          description: "Internal server error."
+
+  /api/myAddedloo:
+    post:
+      summary: "My Added Bathroom"
+      description: "Add or update information about bathrooms added by the user."
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  description: "The ID of the user adding or updating the bathroom."
+                looName:
+                  type: string
+                  description: "The name of the bathroom."
+                location:
+                  type: string
+                  description: "The location of the bathroom."
+                address:
+                  type: string
+                  description: "The address of the bathroom."
+                description:
+                  type: string
+                  description: "A description of the bathroom."
+                gender:
+                  type: string
+                  description: "The gender of the bathroom (male/female/unisex)."
+                needKey:
+                  type: boolean
+                  description: "Boolean indicating if a key is needed."
+                wheelChair:
+                  type: boolean
+                  description: "Boolean indicating if the bathroom is wheelchair accessible."
+                anemities:
+                  type: object
+                  description: "Anemities available in the bathroom."
+                  properties:
+                    blowDrayer:
+                      type: boolean
+                      description: "Boolean indicating if a blow dryer is available."
+                    paperTowel:
+                      type: boolean
+                      description: "Boolean indicating if paper towels are available."
+                    touchLessPaperTowel:
+                      type: boolean
+                      description: "Boolean indicating if touchless paper towels are available."
+                    touchLessSoapDispenser:
+                      type: boolean
+                      description: "Boolean indicating if a touchless soap dispenser is available."
+                    feminineProduct:
+                      type: boolean
+                      description: "Boolean indicating if feminine products are available."
+                    babyChangingStation:
+                      type: boolean
+                      description: "Boolean indicating if a baby changing station is available."
+      responses:
+        "200":
+          description: "Data updated successfully."
+        "400":
+          description: "Invalid data provided or missing parameters."
+        "401":
+          description: "Enter correct gender or user not found."
+        "404":
+          description: "User not found. First register yourself then add your bath."
+        "500":
+          description: "Internal server error."
+
+  /api/filter_bath:
+    post:
+      summary: "Filter Bathrooms"
+      description: "Filter bathrooms based on specified amenities and other criteria."
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                anemities:
+                  type: object
+                  description: "Anemities to filter by."
+                  properties:
+                    blowDrayer:
+                      type: boolean
+                      description: "Filter by blow dryer availability."
+                    paperTowel:
+                      type: boolean
+                      description: "Filter by paper towel availability."
+                    touchLessPaperTowel:
+                      type: boolean
+                      description: "Filter by touchless paper towel availability."
+                    touchLessSoapDispenser:
+                      type: boolean
+                      description: "Filter by touchless soap dispenser availability."
+                    feminineProduct:
+                      type: boolean
+                      description: "Filter by feminine product availability."
+                    babyChangingStation:
+                      type: boolean
+                      description: "Filter by baby changing station availability."
+                needKey:
+                  type: boolean
+                  description: "Filter by whether a key is needed."
+                wheelChair:
+                  type: boolean
+                  description: "Filter by wheelchair accessibility."
+      responses:
+        "200":
+          description: "List of filtered bathrooms."
+        "400":
+          description: "No bathroom found."
+        "500":
+          description: "Internal server error."
+
+  /api/updateProfile/{id}:
+    put:
+      summary: "Update User Profile"
+      description: "Update user profile information."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: "The ID of the user to update."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: "Updated user profile information."
+      responses:
+        "401":
+          description: "User updated."
+        "404":
+          description: "User not found."
+        "500":
+          description: "Internal server error."
+
+  /api/updateBath/{id}:
+    put:
+      summary: "Update Bathroom Details"
+      description: "Update details of a specific bathroom."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: "The ID of the bathroom to update."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: "Updated bathroom details."
+      responses:
+        "200":
+          description: "Bathroom updated."
+        "404":
+          description: "Bathroom not found."
+        "500":
+          description: "Internal server error."
+
+  /api/getUserWash/{id}:
+    get:
+      summary: "Get User's Bathrooms"
+      description: "Get the list of bathrooms added by a specific user along with average quality rating."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: "The ID of the user."
+      responses:
+        "200":
+          description: "List of user's bathrooms with average quality rating."
+        "404":
+          description: "User not found."
+        "500":
+          description: "Internal server error."
