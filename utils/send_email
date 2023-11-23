@@ -1,0 +1,27 @@
+const nodemailer = require("nodemailer");
+const dotenv = require("dotenv");
+dotenv.config();
+const sendVerificationLink = (email, verificationToken) => {
+  const transporter = nodemailer.transporter({
+    service: "gmail",
+    auth: {
+      user: process.env.UserName,
+      pass: process.env.UserPassword,
+    },
+  });
+
+const mailOptions={
+    from :process.env.UserName,
+    to:email,
+    subject:"Verification email",
+    message:`Your verification Token  ${verificationToken}`
+}
+transporter.sendMail(mailOptions,(error,info)=>{
+    if(error){
+        console.error(error);
+    }else{
+        console.log("Verification send to your email "+info);
+    }
+})
+
+};
